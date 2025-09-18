@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Contents from "./Contents.jsx";
 import SpoilerAlert from "./SpoilerAlert.jsx"
+import {useRouter} from "next/navigation";
 
 const contentsData = [
     {id:1,title:'映画A', commentCount:5, imageUrl:"a.jpg"},
@@ -12,15 +13,35 @@ const contentsData = [
     {id:5,title:'ドラマE',commentCount:23, imageUrl:'e.jpg'},
 ];
 
+const commentsData = [
+    {id:1, comment:'おもろい', good:3, bad:0},
+    {id:2, comment:'さいこー', good:5, bad:1},
+    {id:3, comment:'nice', good:2, bad:1},
+];
+
 
 export default function Main() {
     // const [showAlert, setShowAlert] = useState(true);
     const [selectedContent, setSelectedContent] = useState(null);
+    const router = useRouter();
     
     const handleContentClick = (content) => {
-        console.log(content.title + "がクリックされました！");
+        //console.log(content.title + "がクリックされました！");
         setSelectedContent(content);
     }
+
+    //「はい」のときの処理
+    const handleConfirm = () => {
+        if(selectedContent) {
+            router.push(`/${selectedContent.id}`);
+        }
+        setSelectedContent(null);
+    }
+
+    //「いいえ」のときの処理
+    const handleCancel = () => {
+        setSelectedContent(null);
+    };
 
     return(
         <main className="max-w-7xl mx-auto px-4 py-8">
@@ -37,9 +58,10 @@ export default function Main() {
             </div>
 
             {(selectedContent !== null) && (
-                <SpoilerAlert 
-                    onConfirm={() => setSelectedContent(null)}
-                    onCancel={() => setSelectedContent(null)}
+                <SpoilerAlert
+                    contentTitle={selectedContent.title} 
+                    onConfirm={handleConfirm}
+                    onCancel={handleCancel}
                 />
             )}
 
