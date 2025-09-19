@@ -6,8 +6,9 @@ export default function CommentAdd( {onPost} ) {
     const [commentText, setCommentText] = useState('');
     const handleSubmit = (event) => {
         event.preventDefault();
-        onPost();
-    }
+        onPost(commentText);
+        //setCommentText("");
+    };
     
     return(
         <form 

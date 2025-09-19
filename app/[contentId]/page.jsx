@@ -14,12 +14,38 @@ const commentsData = [
 
 export default function CommentPage({ params }) {
 
+    //コメントリスト全体のデータ
+    const [comments, setComments] = useState(commentsData);
+    //ポップアップを表示するかどうか
     const [postButton, setPostButton] = useState(false);
+    //投稿待ちのコメントのテキスト
+    const [commentToPost, setCommentToPost] = useState("");
 
     //「投稿」のときの処理
-    const handlePost = () => {
-        setPostButton(true);
-    }
+    const handlePost = (text) => {
+        setCommentToPost(text);//コメントの記憶
+        setPostButton(true);//ポップアップの表示
+    };
+
+    //「はい」が押されたとき
+    const handleConfirmPost = () => {
+        const newComment = {
+            id: Date.now(),
+            comment:commentToPost,
+            good:0,
+            bad:0,
+        };
+        setComments([... comments, newComment]);
+        
+        setPostButton(false);
+        //setCommentToPost("");
+    };
+
+    //「かきなおす」が押されたとき
+    const handleCancelPost = () => {
+        setPostButton(false);
+        setCommentToPost("");
+    };
 
     return (
         <main>
@@ -27,21 +53,26 @@ export default function CommentPage({ params }) {
                 <CommentHeader />
                 {/* <h1>コンテンツ: {params.contentId} のコメントページ</h1>
                 <p>ここにコメント一覧や投稿フォームを作っていきます。</p> */}
-                {commentsData.map(comments => (
+                {comments.map(comment => (
                     <CommentList
-                        key={comments.id}
-                        comment={comments.comment}
-                        good={comments.good}
-                        bad={comments.bad}
+                        key={comment.id}
+                        comment={comment.comment}
+                        good={comment.good}
+                        bad={comment.bad}
                     />
                 ))}
                 <CommentAdd
                     onPost={handlePost} />
             </div>
 
-            {(postButton === true) &&
-                < PostAlert />
-            }
+            {(postButton === true) && (
+                < PostAlert 
+                    contentTitle={commentToPost}
+                    onConfirm={handleConfirmPost}
+                    onCancel={handleCancelPost}
+                />
+                    
+            )}
         </main>
     );
 }
