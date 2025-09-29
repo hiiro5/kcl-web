@@ -4,6 +4,9 @@ import { useState } from 'react';
 import Contents from "./Contents.jsx";
 import SpoilerAlert from "./SpoilerAlert.jsx"
 import {useRouter} from "next/navigation";
+import Search from "./Search.jsx";
+import ContentsAdd from "./ContentsAdd.jsx"
+import ContentsAddPop from "./ContentsAddPop.jsx";
 
 const contentsData = [
     {id:1,title:'映画A', commentCount:5, imageUrl:"a.jpg"},
@@ -21,7 +24,11 @@ const commentsData = [
 
 
 export default function Main() {
-    // const [showAlert, setShowAlert] = useState(true);
+    
+     //検索ワードを記憶するためのstate
+    const [searchTerm, setSearchTerm]=useState("")
+    
+    //どのコンテンツが選択されているかをあらわすstate
     const [selectedContent, setSelectedContent] = useState(null);
     const router = useRouter();
     
@@ -29,6 +36,21 @@ export default function Main() {
         //console.log(content.title + "がクリックされました！");
         setSelectedContent(content);
     }
+
+    //今のコンテンツ
+    const [contents, setContents] = useState(contentsData);
+    //コンテンツの追加ボタンのstate
+    const [contentsAddButton, setContentsAddButton] = useState(false);
+
+    const contentsAddClick = (content) => {
+        setContentsAddButton(content);
+    }
+
+
+    //検索のsearchTermを元に、表示するコンテンツの絞り込み
+    const filteredContents = contents.filter(content =>
+        content.title.toLowerCase().includes(searchTerm.toLowerCase())
+    );
 
     //「はい」のときの処理
     const handleConfirm = () => {
@@ -43,10 +65,25 @@ export default function Main() {
         setSelectedContent(null);
     };
 
+    //コンテンツ「追加」のときの処理
+    const handleAddContent = (newContentData) => {
+        const newContent = {
+            id:Date.now(),
+            title: newContentData.title,
+            imageUrl: newContentData.imageUrl,
+            commentCount:0,
+        };
+        setContents([...contents, newContent]);
+        setContentsAddButton(false);
+    };
+
     return(
         <main className="max-w-7xl mx-auto px-4 py-8">
+            <Search 
+                searchTerm={searchTerm} setSearchTerm={setSearchTerm}/>
+        
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {contentsData.map(contents => (
+                {filteredContents.map(contents => (
                     <Contents
                         key={contents.id}
                         title={contents.title}
@@ -64,6 +101,19 @@ export default function Main() {
                     onCancel={handleCancel}
                 />
             )}
+
+            <ContentsAdd 
+                onClick = {() => setContentsAddButton(true)}
+            />
+
+            {contentsAddButton && (
+                <ContentsAddPop
+                    onAdd={handleAddContent}
+                    onCancel={()=> setContentsAddButton(false)}
+                />
+            )}
+
+
 
         </main>
 

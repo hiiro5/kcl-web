@@ -105,14 +105,14 @@
 // app/page.jsx
 
 import Header from '../components/Header.jsx'; // 1. 部品を読み込む
-import Search from "../components/Search.jsx";
+//import Search from "../components/Search.jsx";
 import Main from "../components/Main.jsx";
 
 export default function Home() {
   return (
     <div>
       <Header /> {/* 2. 部品を呼び出す */}
-      <Search />
+      {/* <Search /> */}
       <main>
         {/* <p>ここにメインのコンテンツが入ります。</p> */}
         <Main />

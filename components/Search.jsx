@@ -10,13 +10,20 @@
 //     }
 // }
 
-export default function Search() {
+export default function Search({searchTerm, setSearchTerm}) {
+    const hanleSubmit = (event) => {
+        event.preventDefault();
+    };
+
     return(
      <form className="flex items-center">
         <input 
             type ="text " 
-            placeholder="🔍検索..."
-            className="p-2 border rounded-l-md focus:outline-slate-300 my-4"/>
+            placeholder="検索..."
+            className="p-2 border rounded-l-md focus:outline-slate-300 my-4"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+        />
                 
         <button 
             type ="submit"
