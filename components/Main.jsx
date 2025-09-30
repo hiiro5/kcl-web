@@ -7,6 +7,7 @@ import {useRouter} from "next/navigation";
 import Search from "./Search.jsx";
 import ContentsAdd from "./ContentsAdd.jsx"
 import ContentsAddPop from "./ContentsAddPop.jsx";
+import Login from "./Login.jsx";
 
 const contentsData = [
     {id:1,title:'映画A', commentCount:5, imageUrl:"a.jpg"},
@@ -46,6 +47,9 @@ export default function Main() {
         setContentsAddButton(content);
     }
 
+    //ログインボタンのstate
+    const [login, setLogin] = useState(true);
+
 
     //検索のsearchTermを元に、表示するコンテンツの絞り込み
     const filteredContents = contents.filter(content =>
@@ -65,6 +69,11 @@ export default function Main() {
         setSelectedContent(null);
     };
 
+    //ログインボタン
+    const handleLogin = () => {
+        setLogin(false);
+    }
+
     //コンテンツ「追加」のときの処理
     const handleAddContent = (newContentData) => {
         const newContent = {
@@ -79,6 +88,11 @@ export default function Main() {
 
     return(
         <main className="max-w-7xl mx-auto px-4 py-8">
+            
+            {login && 
+            <Login
+                onLoginButton={() => setLogin(false)}/>}
+
             <Search 
                 searchTerm={searchTerm} setSearchTerm={setSearchTerm}/>
         
