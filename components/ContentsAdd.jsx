@@ -14,7 +14,7 @@ export default function ContentsAdd( {onClick} ) {
     return(
         <button 
             type ="submit"
-            className="p-2 bg-blue-500 text-white rounded hover:bg-blue-700"
+            className="p-2 bg-blue-500 text-white rounded hover:bg-blue-600"
             onClick = {onClick}>＋</button>
         
     );
