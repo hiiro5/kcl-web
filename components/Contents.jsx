@@ -10,7 +10,7 @@ export default function Contents({name, imageUrl, onClick, username, created_at}
             {/* <h2>コメント数:{commentCount}</h2> */}
             <img
                 src={imageUrl}
-                alt={name}
+                alt={imageUrl}
                 className="h-32 w-full object-cover aspect-video"
             />
             <p className="text-sm text-gray-600">作成者：{username || "名無し"}</p>

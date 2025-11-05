@@ -7,6 +7,7 @@ import CommentAdd from "../../components/CommentAdd.jsx";
 import PostAlert from "../../components/PostAlert.jsx";
 //import { SupabaseAuthClient } from "@supabase/supabase-js/dist/module/lib/SupabaseAuthClient.js";
 import { createClient } from "../../lib/supabase/clients";
+import DeleteButton from "../../components/DeleteButton.jsx";
 
 const supabase = createClient();
 
@@ -25,7 +26,8 @@ export default function CommentPage({ params }) {
     const [postButton, setPostButton] = useState(false);
     //投稿待ちのコメントのテキスト
     const [commentToPost, setCommentToPost] = useState("");
-
+    //ユーザ情報
+    const [currentUser,setCurrentUser] = useState(null);
 
     useEffect( () => {
         console.log("useEffect running for ID:",params.contentId);
@@ -53,6 +55,15 @@ export default function CommentPage({ params }) {
         };
         fetchComments();
     }, [params.contentId]);
+
+    //ログイン中のユーザ情報取得
+    useEffect(() => {
+        const fetchUser = async () => {
+            const {data:{user}} = await supabase.auth.getUser();
+            setCurrentUser(user);
+        };
+        fetchUser();
+    },[]);
 
     //「投稿」のときの処理
     const handlePost = (text) => {
@@ -119,22 +130,44 @@ export default function CommentPage({ params }) {
         setCommentToPost("");
     };
 
+    //画面(State)からコメントを削除する関数
+    const handleCommentDelete = (deletedId) => {
+        setComments(prevComments =>
+            prevComments.filter(comment => comment.id !== deletedId)
+        );
+    };
+
     return (
         <main>
             <div>
                 <Header />
                 {/* <h1>コンテンツ: {params.contentId} のコメントページ</h1>
                 <p>ここにコメント一覧や投稿フォームを作っていきます。</p> */}
-                {comments.map(comment => (
-                    <CommentList
-                        key={comment.id}
-                        comment={comment.comment}
-                        good_count={comment.good_count}
-                        bad_count={comment.bad_count}
-                        username={comment.username}
-                        created_at={comment.created_at}
-                    />
-                ))}
+                {comments.map(comment => {
+                    const currentUsername = currentUser?.user_metadata?.username;
+
+                    return (
+                        <div key={comment.id}>
+                            <CommentList
+                                key={comment.id}
+                                comment={comment.comment}
+                                good_count={comment.good_count}
+                                bad_count={comment.bad_count}
+                                username={comment.username}
+                                created_at={comment.created_at}
+                            />
+                            {currentUsername && comment.username === currentUsername && (
+                                <div className="p-2 text-right">
+                                    <DeleteButton
+                                        postId={comment.id}
+                                        tableName="contents_details"
+                                        onDeleteSuccess={handleCommentDelete}
+                                    />
+                                </div>
+                            )}
+                            </div>
+                    );
+})}
                 <CommentAdd
                     onPost={handlePost} />
             </div>

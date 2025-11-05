@@ -12,6 +12,7 @@ import ContentsAdd from "./ContentsAdd.jsx"
 import ContentsAddPop from "./ContentsAddPop.jsx";
 import Login from "./Login.jsx";
 import Explain from "./Explain.jsx";
+import DeleteButton from "./DeleteButton";
 
 const supabase = createClient();
 
@@ -52,9 +53,24 @@ export default function Main() {
     const contentsAddClick = (content) => {
         setContentsAddButton(content);
     }
-      //ログインボタンのstate
+
+    //いま誰がログインしているか
+    const [currentUser, setCurrentUser] = useState(null);
+    //ログインボタンのstate
     //const [login, setLogin] = useState(true);
 
+    //ログイン中のユーザ情報
+    useEffect(() => {
+        const fetchUser = async () => {
+            const { data:{user}} = await supabase.auth.getUser();
+            setCurrentUser(user);
+        };
+        fetchUser();
+    }, []);
+
+
+
+    //データの取得
     useEffect(() => {
         const fetchContents = async () => {
             const { data, error } = await supabase
@@ -96,46 +112,109 @@ export default function Main() {
 
     //コンテンツ「追加」のときの処理
     const handleAddContent = async (newContentData) => {
-        if(!newContentData.title.trim() || !newContentData.imageUrl.trim()) {
-            alert("タイトルと画像URLを入力してください");
-            return;
-        }
+        // if(!newContentData.title.trim() || !newContentData.imageUrl.trim()) {
+        //     alert("タイトルと画像を入力してください");
+        //     return;
+        // }
         // const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
         // if (sessionError) {
         //     console.error(sessionError);
         // }
 
-        const {data: {user}} = await supabase.auth.getUser();
-        const username = user?.user_metadata?.username || "名無し";
+        const {title, file} = newContentData;
+        if(!title.trim() || !file) {
+            alert("タイトルと画像を入力してください");
+            return;
+        }
 
-        const { data: newEntry, error } = await supabase
-            .from("contents")
-            .insert([
-                {
-                    name: newContentData.title,
-                    picture: newContentData.imageUrl,
-                    username: username
-                }
-            ])
+        try {
+            const {data: {user}, error:userError} = await supabase.auth.getUser();
+            if( userError || !user) {
+                throw new Error("ログインしていません。アップロードできません。");
+            }
+            const username = user?.user_metadata?.username || "名無し";
+
+            const uniqueFileName = `${Date.now()}-${file.name}`;
+            const filePath = `uploads/${user.id}/${uniqueFileName}`;
+
+            const { data: uploadData, error: storageError } = await supabase.storage
+                .from("content-images")
+                .upload(filePath, file, {
+                    contentType: file.type
+                });
+
+            if (storageError) {
+                throw storageError;
+            }
+
+            const {data: urlData} =supabase.storage
+                .from("content-images")
+                .getPublicUrl(uploadData.path);
+
+            if(!urlData || !urlData.publicUrl) {
+                throw new Error("画像URLの取得に失敗しました");
+            }
+
+            const imageUrl = urlData.publicUrl;
+
+            //データベースに情報を保存
+            const {data: newEntry, error:dbError} = await supabase
+                .from("contents")
+                .insert([
+                 {
+                     name: title,
+                     picture: imageUrl,
+                     username: username,
+                     //user_id:user.id
+                 }
+             ])
             .select()
             .single();
 
-        if (error) {
-            console.log("データ追加失敗", error);
-        } else if (newEntry) {
+        if(dbError) {
+            throw dbError;
+        }
+
+        if(newEntry) {
             setContents(prevContents => [newEntry, ...prevContents]);
         }
 
-        // const newContent = {
-        //     id:Date.now(),
-        //     title: newContentData.title,
-        //     imageUrl: newContentData.imageUrl,
-        //     commentCount:0,
-        // };
-        // setContents([...contents, newContent]);
+    }catch (error) {
+            console.error("アップロード処理中にエラーが発生しました",error.message);
+            alert(`エラー:${error.message}`);
+        }
+
+        //ポップアップを閉じる
         setContentsAddButton(false);
+    };     
+
+    //     if (error) {
+    //         console.log("データ追加失敗", error);
+    //     } else if (newEntry) {
+    //         setContents(prevContents => [newEntry, ...prevContents]);
+    //     }
+
+    //     // const newContent = {
+    //     //     id:Date.now(),
+    //     //     title: newContentData.title,
+    //     //     imageUrl: newContentData.imageUrl,
+    //     //     commentCount:0,
+    //     // };
+    //     // setContents([...contents, newContent]);
+    //     setContentsAddButton(false);
+    // };
+
+    //画面からコンテンツを削除する関数
+    const handleContentDelete = (deleteId) => {
+        setContents(prevContents =>
+            prevContents.filter(content =>content.id !== deleteId)
+        );
+        setSelectedContent(null);
     };
 
+// {filteredContents.map(content => {
+
+//     
     return (
         <main className="max-w-7xl mx-auto px-4 py-8">
 
@@ -147,17 +226,32 @@ export default function Main() {
                 searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {filteredContents.map(content => (
-                    <Contents
-                        key={content.id}
-                        name={content.name}
-                        //commentCount={content.commentCount}
-                        imageUrl={content.picture}
-                        onClick={() => handleContentClick(content)}
-                        username={content.username}
-                        created_at={content.created_at}
-                    />
-                ))}
+                {filteredContents.map(content => {
+                    const currentUsername = currentUser?.user_metadata?.username;
+
+                    return(
+                        <div key={content.id}>
+                            <Contents
+                                name={content.name}
+                                //commentCount={content.commentCount}
+                                imageUrl={content.picture}
+                                onClick={() => handleContentClick(content)}
+                                username={content.username}
+                                created_at={content.created_at}
+                            />
+                        {currentUsername && content.username === currentUsername && (
+                           <div className="p-2 text-right">
+                                    <DeleteButton
+                                        postId={content.id}
+                                        tableName="contents"
+                                        onDeleteSuccess={handleContentDelete}
+                                    />
+                            </div> 
+                        )}
+                    </div>
+
+                    );
+                })}
             </div>
 
             {(selectedContent !== null) && (
@@ -182,6 +276,5 @@ export default function Main() {
 
 
         </main>
-
     );
 }
