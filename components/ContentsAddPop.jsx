@@ -4,19 +4,19 @@ import { useState } from "react";
 export default function ContentsAddPop({ onAdd, onCancel }) {
    //タイトルとurlのstate
     const [title, setTitle] = useState("");
-    //const [imageUrl, setImageUrl] = useState("");
-    const [file, setFile] = useState(null);
+    const [imageUrl, setImageUrl] = useState("");
+    //const [file, setFile] = useState(null);
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        onAdd({title, file});
+        onAdd({title, imageUrl});
     };
 
-    const handleFileChange = (e) => {
-        if(e.target.files && e.target.files.length > 0) {
-            setFile(e.target.files[0]);
-        }
-    };
+    // const handleFileChange = (e) => {
+    //     if(e.target.files && e.target.files.length > 0) {
+    //         setFile(e.target.files[0]);
+    //     }
+    // };
 
     return(
         <div className="fixed inset-0 flex items-center justify-center border bg-black/50">
@@ -27,12 +27,13 @@ export default function ContentsAddPop({ onAdd, onCancel }) {
                        className="w-full p-2 border rounded mb-4"
                        placeholder="タイトル"
                        required/>
-                <input //value={imageUrl}
-                       type="file" 
-                       onChange={handleFileChange}
+                <input value={imageUrl}
+                       type="text" 
+                       //onChange={handleFileChange}
+                       onChange={e => setImageUrl(e.target.value)}
                        className="w-full p-2 border rounded mb-4"
-                       accept="image/jpeg, image/jpg, image/png, image/gif"
-                       placeholder="画像" 
+                       //accept="image/jpeg, image/jpg, image/png, image/gif"
+                       placeholder="画像URL" 
                        required/>
                 <div className="flex justify-end">
                     <button type="button" onClick={onCancel} className="px-4 py-2 rounded hover:text-blue-600">キャンセル</button>

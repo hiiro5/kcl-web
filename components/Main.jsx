@@ -121,72 +121,119 @@ export default function Main() {
         //     console.error(sessionError);
         // }
 
-        const {title, file} = newContentData;
-        if(!title.trim() || !file) {
-            alert("タイトルと画像を入力してください");
+    //     const {title, file} = newContentData;
+    //     if(!title.trim() || !file) {
+    //         alert("タイトルと画像を入力してください");
+    //         return;
+    //     }
+
+    //     try {
+    //         const {data: {user}, error:userError} = await supabase.auth.getUser();
+    //         if( userError || !user) {
+    //             throw new Error("ログインしていません。アップロードできません。");
+    //         }
+    //         const username = user?.user_metadata?.username || "名無し";
+
+    //         const uniqueFileName = `${Date.now()}-${file.name}`;
+    //         const filePath = `uploads/${user.id}/${uniqueFileName}`;
+
+    //         const { data: uploadData, error: storageError } = await supabase.storage
+    //             .from("content-images")
+    //             .upload(filePath, file, {
+    //                 contentType: file.type
+    //             });
+
+    //         if (storageError) {
+    //             throw storageError;
+    //         }
+
+    //         const {data: urlData} =supabase.storage
+    //             .from("content-images")
+    //             .getPublicUrl(uploadData.path);
+
+    //         if(!urlData || !urlData.publicUrl) {
+    //             throw new Error("画像URLの取得に失敗しました");
+    //         }
+
+    //         const imageUrl = urlData.publicUrl;
+
+    //         //データベースに情報を保存
+    //         const {data: newEntry, error:dbError} = await supabase
+    //             .from("contents")
+    //             .insert([
+    //              {
+    //                  name: title,
+    //                  picture: imageUrl,
+    //                  username: username,
+    //                  //user_id:user.id
+    //              }
+    //          ])
+    //         .select()
+    //         .single();
+
+    //     if(dbError) {
+    //         throw dbError;
+    //     }
+
+    //     if(newEntry) {
+    //         setContents(prevContents => [newEntry, ...prevContents]);
+    //     }
+
+    // }catch (error) {
+    //         console.error("アップロード処理中にエラーが発生しました",error.message);
+    //         alert(`エラー:${error.message}`);
+    //     }
+
+    //     //ポップアップを閉じる
+    //     setContentsAddButton(false);
+    // };     
+
+        
+        // newContentData は { title: "...", imageUrl: "..." } という形
+        
+        // 1. バリデーション
+        if (!newContentData.title.trim() || !newContentData.imageUrl.trim()) {
+            alert("タイトルと画像URLを入力してください");
             return;
         }
 
         try {
-            const {data: {user}, error:userError} = await supabase.auth.getUser();
-            if( userError || !user) {
-                throw new Error("ログインしていません。アップロードできません。");
-            }
+            // 2. ユーザー名の取得
+            const { data: { user }, error: userError } = await supabase.auth.getUser();
             const username = user?.user_metadata?.username || "名無し";
 
-            const uniqueFileName = `${Date.now()}-${file.name}`;
-            const filePath = `uploads/${user.id}/${uniqueFileName}`;
-
-            const { data: uploadData, error: storageError } = await supabase.storage
-                .from("content-images")
-                .upload(filePath, file, {
-                    contentType: file.type
-                });
-
-            if (storageError) {
-                throw storageError;
-            }
-
-            const {data: urlData} =supabase.storage
-                .from("content-images")
-                .getPublicUrl(uploadData.path);
-
-            if(!urlData || !urlData.publicUrl) {
-                throw new Error("画像URLの取得に失敗しました");
-            }
-
-            const imageUrl = urlData.publicUrl;
-
-            //データベースに情報を保存
-            const {data: newEntry, error:dbError} = await supabase
+            // 3. データベース (contentsテーブル) に情報を保存
+            // (RLSは 'authenticated' チェック [ステップ1] で通過する)
+            const { data: newEntry, error: dbError } = await supabase
                 .from("contents")
                 .insert([
-                 {
-                     name: title,
-                     picture: imageUrl,
-                     username: username,
-                     //user_id:user.id
-                 }
-             ])
-            .select()
-            .single();
+                    {
+                        name: newContentData.title,
+                        picture: newContentData.imageUrl, // ← フォームからのURLを直接保存
+                        username: username
+                        // user_id は Default Value (auth.uid()) に任せる
+                    }
+                ])
+                .select()
+                .single();
 
-        if(dbError) {
-            throw dbError;
+            if (dbError) {
+                throw dbError;
+            }
+
+            // 4. 画面の表示を更新
+            if (newEntry) {
+                setContents(prevContents => [newEntry, ...prevContents]);
+            }
+
+        } catch (error) {
+            console.error('追加処理中にエラーが発生しました:', error.message);
+            alert(`エラー: ${error.message}`);
         }
 
-        if(newEntry) {
-            setContents(prevContents => [newEntry, ...prevContents]);
-        }
-
-    }catch (error) {
-            console.error("アップロード処理中にエラーが発生しました",error.message);
-            alert(`エラー:${error.message}`);
-        }
-
-        //ポップアップを閉じる
+        // 5. ポップアップを閉じる
         setContentsAddButton(false);
-    };     
+    };
 
     //     if (error) {
     //         console.log("データ追加失敗", error);
