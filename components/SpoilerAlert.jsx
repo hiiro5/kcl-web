@@ -1,6 +1,6 @@
 export default function SpoilerAlert({contentTitle, onCancel, onConfirm}) {
     return (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-40">
             <div className="bg-blue-100 p-8 rounded-lg text-center">
                 <h3 className="text-left underline ">{contentTitle}</h3>
                 <h2 className="text-xl font-bold mb-4">

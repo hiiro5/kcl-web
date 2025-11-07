@@ -20,7 +20,7 @@ export default function Search({searchTerm, setSearchTerm}) {
      <form className="flex items-center">
         <input 
             type ="text " 
-            placeholder="検索..."
+            placeholder="作品名を検索..."
             className="p-2 border rounded-md focus:outline-slate-300 my-4 bg-blue-50"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
