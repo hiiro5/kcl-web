@@ -5,18 +5,31 @@
 "use client";
 
 import LogoutButton from "./Logout.jsx";
+import Search from "./Search.jsx";
 
-export default function Header() {
+
+
+export default function Header({searchTerm, setSearchTerm}) {
   return (
-    <header className="sticky top-0 z-50 flex justify-between items-center border bg-blue-300 p-2">
-      <h1 className="text-lg font-medium">感想共有サイト</h1>
-      <LogoutButton />
-      {/* <nav>
-        <a href="/">ホーム</a>
-        <a href="/about">このサイトについて</a>
-      </nav> */}
-      {/* <Search /> */}
-
+    <header className="sticky top-0 z-50 flex justify-between items-center border bg-blue-300">
+      <div className="flex items-center">
+        <img src="/logo2.png" alt="ロゴ" className="h-15 w-auto pl-2 "/>
+        <h1 className="text-lg font-sm p-2 text-blue-600">ホーム</h1>
+      </div>
+      <div className="flex items-center">
+        <div>
+          <Search 
+            searchTerm={searchTerm} setSearchTerm={setSearchTerm}/>
+        </div>
+        <div className="p-4">
+          <LogoutButton />
+          {/* <nav>
+            <a href="/">ホーム</a>
+            <a href="/about">このサイトについて</a>
+          </nav> */}
+          {/* <Search /> */}
+        </div>
+      </div>
 
     </header>
 

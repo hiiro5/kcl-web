@@ -21,15 +21,15 @@ export default function Search({searchTerm, setSearchTerm}) {
         <input 
             type ="text " 
             placeholder="検索..."
-            className="p-2 border rounded-l-md focus:outline-slate-300 my-4"
+            className="p-2 border rounded-md focus:outline-slate-300 my-4 bg-blue-50"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
         />
                 
-        <button 
+        {/* <button 
             type ="submit"
             className="p-2 bg-blue-500 text-white rounded-r hover:bg-blue-700">検索</button>
-            
+             */}
     </form>   
     );
 }

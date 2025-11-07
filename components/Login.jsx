@@ -82,7 +82,7 @@ export default function Login() {
 
   return (
 
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center">
+    <div className=" z-50 fixed inset-0 bg-black/50 flex items-center justify-center">
       <div className="bg-blue-100 p-8 rounded-lg text-center">
 
         <form onSubmit={handleSubmit}>

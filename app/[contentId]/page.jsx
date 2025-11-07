@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import CommentList from "../../components/CommentList.jsx";
-import Header from "../../components/Header.jsx";
+import CommentHeader from "../../components/CommentHeader.jsx";
 import CommentAdd from "../../components/CommentAdd.jsx";
 import PostAlert from "../../components/PostAlert.jsx";
 //import { SupabaseAuthClient } from "@supabase/supabase-js/dist/module/lib/SupabaseAuthClient.js";
@@ -28,6 +28,8 @@ export default function CommentPage({ params }) {
     const [commentToPost, setCommentToPost] = useState("");
     //ユーザ情報
     const [currentUser,setCurrentUser] = useState(null);
+    // //タイトル
+    // const [contentTitle, setContentTitle] = useState("");
 
     useEffect( () => {
         console.log("useEffect running for ID:",params.contentId);
@@ -140,11 +142,12 @@ export default function CommentPage({ params }) {
     return (
         <main>
             <div>
-                <Header />
+                <CommentHeader />
                 {/* <h1>コンテンツ: {params.contentId} のコメントページ</h1>
                 <p>ここにコメント一覧や投稿フォームを作っていきます。</p> */}
                 {comments.map(comment => {
                     const currentUsername = currentUser?.user_metadata?.username;
+                    const isMyComment = currentUsername && comment.username === currentUsername; 
 
                     return (
                         <div key={comment.id}>
@@ -155,16 +158,18 @@ export default function CommentPage({ params }) {
                                 bad_count={comment.bad_count}
                                 username={comment.username}
                                 created_at={comment.created_at}
-                            />
-                            {currentUsername && comment.username === currentUsername && (
-                                <div className="p-2 text-right">
-                                    <DeleteButton
-                                        postId={comment.id}
-                                        tableName="contents_details"
-                                        onDeleteSuccess={handleCommentDelete}
-                                    />
-                                </div>
-                            )}
+                            >
+                            
+                                {isMyComment && (
+                                    <div className="p-2 text-right">
+                                        <DeleteButton
+                                            postId={comment.id}
+                                            tableName="contents_details"
+                                            onDeleteSuccess={handleCommentDelete}
+                                        />
+                                    </div>
+                                )}
+                            </CommentList>
                             </div>
                     );
 })}

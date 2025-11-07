@@ -31,10 +31,10 @@ const commentsData = [
 ];
 
 
-export default function Main() {
+export default function Main({searchTerm}) {
     const [session, setSession] = useState(null);
-     //検索ワードを記憶するためのstate
-    const [searchTerm, setSearchTerm] = useState("")
+    //  //検索ワードを記憶するためのstate
+    // const [searchTerm, setSearchTerm] = useState("")
 
     //どのコンテンツが選択されているかをあらわすstate
     const [selectedContent, setSelectedContent] = useState(null);
@@ -75,11 +75,15 @@ export default function Main() {
         const fetchContents = async () => {
             const { data, error } = await supabase
                 .from("contents")
-                .select("*")
+                .select("*,contents_details(count)")
                 .order("created_at", { ascending: false });
 
             if (data) {
-                setContents(data);
+                const formattedData = data.map(content => ({
+                ...content,
+                commentCount: content.contents_details[0]?.count || 0    
+                }));
+                setContents(formattedData);
             } else {
                 console.log("データ取得失敗", error);
             }
@@ -269,8 +273,8 @@ export default function Main() {
             <Login />
             {/* // onLoginButton={() => setLogin(false)}/>} */} 
             <Explain />
-            <Search
-                searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
+            {/* <Search
+                searchTerm={searchTerm} setSearchTerm={setSearchTerm} /> */}
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {filteredContents.map(content => {
@@ -285,6 +289,7 @@ export default function Main() {
                                 onClick={() => handleContentClick(content)}
                                 username={content.username}
                                 created_at={content.created_at}
+                                commentCount={content.commentCount}
                             />
                         {currentUsername && content.username === currentUsername && (
                            <div className="p-2 text-right">
