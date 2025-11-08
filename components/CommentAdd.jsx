@@ -5,11 +5,25 @@ export default function CommentAdd( {onPost} ) {
     
     const [commentText, setCommentText] = useState('');
     const handleSubmit = (event) => {
-        event.preventDefault();
+        // event.preventDefault();
+        // onPost(commentText);
+        // setCommentText("");
+        if(event) event.preventDefault();
+        if(!commentText.trim()) return;
+
         onPost(commentText);
-        //setCommentText("");
+        setCommentText("");
     };
     
+    const handleKeyDown = (e) => {
+        if(e.nativeEvent.isComposing || e.key !== "Enter") return;
+
+        if(!e.shiftKey) {
+            e.preventDefault();
+            handleSubmit();
+        }
+    };
+
     return(
         <div className="fixed bottom-0 left-0 w-full z-50">
             <form 
@@ -21,6 +35,8 @@ export default function CommentAdd( {onPost} ) {
                     placeholder="+ コメントを入力"
                     value={commentText}
                     onChange={(e) => setCommentText(e.target.value)}
+                    onKeyDown={handleKeyDown}
+                    rows={2}
                 ></textarea>
 
                 <button

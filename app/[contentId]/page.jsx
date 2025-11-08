@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, use } from "react";
 import CommentList from "../../components/CommentList.jsx";
 import CommentHeader from "../../components/CommentHeader.jsx";
 import CommentAdd from "../../components/CommentAdd.jsx";
@@ -17,9 +17,9 @@ const supabase = createClient();
 //     { id: 3, comment: 'nice', good: 2, bad: 1 },
 // ];
 
-export default function CommentPage({ params }) {
+export default function CommentPage({ params: paramsPromise }) {
 
-
+    const params = use(paramsPromise);
     //コメントリスト全体のデータ
     const [comments, setComments] = useState([]);
     //ポップアップを表示するかどうか
